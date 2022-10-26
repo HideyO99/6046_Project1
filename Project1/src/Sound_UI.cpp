@@ -7,9 +7,14 @@ Sound_UI::Sound_UI(FModManager* fmod,XML* a_xml)
 {
 	fmodmanager_ = fmod;
 	xml_ = a_xml;
-	iscompress[0] = false;
-	iscompress[1] = false;
-	iscompress[2] = false;
+	for (size_t i = 0; i < 3; i++)
+	{
+		iscompress[i] = false;
+	}
+	for (size_t i = 0; i < 9; i++)
+	{
+		dspenable[i] = false;
+	}
 	channel_ = 0;
 	bps_ = 0;
 	freq = 0.f;
@@ -33,11 +38,11 @@ void Sound_UI::render()
 
 	//setup ui structure
 	ImGui::Begin("Audio Settings");
-	ImGui::BeginChild("##BGM", ImVec2(0,100),true);
+	ImGui::BeginChild("##BGM1", ImVec2(0,60),true);
 	
 	{
 		
-		ImGui::Text("BGM1: %s",xml_->my_music[0].fname.c_str());
+		ImGui::Text("BGM1: %s ",xml_->my_music[0].fname.c_str());
 		ImGui::SameLine();
 		ImGui::Checkbox("compress##CMPSS1", &iscompress[0]);
 		ImGui::SameLine();
@@ -53,10 +58,16 @@ void Sound_UI::render()
 			fmodmanager_->get_sound_lengh("bgm1", &music_length);
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
 		}
+		ImGui::Checkbox("echo##DSP1", &dspenable[0]); 
+		ImGui::SameLine();
+		ImGui::Checkbox("distortion##DSP2", &dspenable[1]);
+		ImGui::SameLine();
+		ImGui::Checkbox("chorus##DSP3", &dspenable[2]);
 	}
-
+	ImGui::EndChild();
+	ImGui::BeginChild("##BGM2", ImVec2(0, 60), true);
 	{
-		ImGui::Text("BGM2: %s", xml_->my_music[1].fname.c_str());
+		ImGui::Text("BGM2: %s ", xml_->my_music[1].fname.c_str());
 		ImGui::SameLine();
 		ImGui::Checkbox("compress##CMPSS2", &iscompress[1]);
 		ImGui::SameLine();
@@ -72,10 +83,16 @@ void Sound_UI::render()
 			fmodmanager_->get_sound_lengh("bgm2", &music_length);
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
 		}
+		ImGui::Checkbox("low pass filter##DSP4", &dspenable[3]);
+		ImGui::SameLine();
+		ImGui::Checkbox("high pass filter##DSP5", &dspenable[4]);
+		ImGui::SameLine();
+		ImGui::Checkbox("fader##DSP6", &dspenable[5]);
 	}
-
+	ImGui::EndChild();
+	ImGui::BeginChild("##BGM3", ImVec2(0, 60), true);
 	{
-		ImGui::Text("BGM3: %s", xml_->my_music[2].fname.c_str());
+		ImGui::Text("BGM3: %s ", xml_->my_music[2].fname.c_str());
 		ImGui::SameLine();
 		ImGui::Checkbox("compress##CMPSS3", &iscompress[2]);
 		ImGui::SameLine();
@@ -92,71 +109,16 @@ void Sound_UI::render()
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
 
 		}
+		ImGui::Checkbox("pitch##DSP7", &dspenable[6]);
+		ImGui::SameLine();
+		ImGui::Checkbox("delay##DSP8", &dspenable[7]);
+		ImGui::SameLine();
+		ImGui::Checkbox("tremolo##DSP9", &dspenable[8]);
 	}
 	ImGui::EndChild();
 
-	//master volume
-	{
-		ImGui::BeginChild("Master_volume_ctrl", ImVec2(120, 140), true);
-		FModManager::CHgroup* channel_group;
-		if (!fmodmanager_->find_channel_group("master", &channel_group))
-		{
-			//cannot find channel group
-			//do something...
-		}
-
-		float current_volume;
-		bool volume_enabled;
-		if (!fmodmanager_->get_channel_vol(MASTER_CH, &current_volume)) {
-			//failed
-		}
-
-		if (!fmodmanager_->get_channel_group_enabled(MASTER_CH, &volume_enabled)) {
-			//failed
-		}
-
-		current_volume *= 100;
-		curr_music_volume = current_volume;
-		ImGui::Checkbox("##master_volume", &volume_enabled);
-		MyKnob("master volume", &current_volume, 0.0f, 100.0f);
-		//ImGui::SliderFloat("master volume", &current_volume, 0.0f, 100.0f, "%.0f");
-		current_volume /= 100;
-
-		// WARNING: volume range (0.0-1.0) //dont go to high above 1 (you can hurt your hardware)
-		if (!fmodmanager_->set_channel_vol(MASTER_CH, current_volume)) {
-			//failed
-		}
-		//ImGui::SameLine();
-
-		if (!fmodmanager_->set_channel_group_enabled(MASTER_CH, volume_enabled)) {
-			//failed
-		}
-
-		//master pan
-		{
-			FModManager::CHgroup* channel_group;
-			if (!fmodmanager_->find_channel_group(MASTER_CH, &channel_group))
-			{
-				//cannot find channel group
-				//do something...
-			}
-			float pan;
-			if (!fmodmanager_->get_channel_group_pan(MASTER_CH, &pan))
-			{
-
-			}
-			channel_group->current_pan = pan;
-			//curr_music_pan = pan;
-			ImGui::SliderFloat("##master pan", &channel_group->current_pan, -1.0f, 1.0f, "%.2f");
-			ImGui::Text("master pan");
-			if (!fmodmanager_->set_channel_group_pan(MASTER_CH, channel_group->current_pan))
-			{
-				//error
-				//do something?
-			}
-		}
-		ImGui::EndChild();
-	}
+	////master volume
+	mastervolume("Master_volume_ctrl", ImVec2(120, 140), &curr_music_volume, &curr_music_pan);
 	
 		ImGui::SameLine();
 	//master pitch
@@ -182,6 +144,7 @@ void Sound_UI::render()
 	}
 
 	ImGui::SameLine();
+
 	//music volume
 	{
 		ImGui::BeginChild("Music_volume_ctrl", ImVec2(120, 140), true);
@@ -222,7 +185,7 @@ void Sound_UI::render()
 			//failed
 		}
 
-		//music pan
+		//music pan //todo -> playback speed by freq
 		{
 			FModManager::CHgroup* channel_group;
 			if (!fmodmanager_->find_channel_group(BGM_CH1, &channel_group))
@@ -236,9 +199,9 @@ void Sound_UI::render()
 
 			}
 			channel_group->current_pan = pan;
-			curr_music_pan = pan;
+			//curr_music_pan = pan;
 			ImGui::SliderFloat("##music pan", &channel_group->current_pan, -1.0f, 1.0f, "%.2f");
-			ImGui::Text("music pan");
+			ImGui::Text("playback speed");
 			if (!fmodmanager_->set_channel_group_pan(BGM_CH1, channel_group->current_pan))
 			{
 				//error
@@ -252,77 +215,15 @@ void Sound_UI::render()
 	ImGui::SameLine();
 
 	//FX volume
-	{
-		ImGui::BeginChild("FX_volume_ctrl", ImVec2(120, 140), true);
+	fxvolume("FX_volume_ctrl", ImVec2(120, 140));
 
-		FModManager::CHgroup* channel_group;
-		if (!fmodmanager_->find_channel_group(FX1_CH, &channel_group))
-		{
-			//cannot find channel group
-			//do something...
-		}
-
-		float current_volume;
-		bool volume_enabled;
-		if (!fmodmanager_->get_channel_vol(FX1_CH, &current_volume)) {
-			//failed
-		}
-
-		if (!fmodmanager_->get_channel_group_enabled(FX1_CH, &volume_enabled)) {
-			//failed
-		}
-		current_volume *= 100;
-		ImGui::Checkbox("##fx_volume", &volume_enabled);
-		MyKnob("fx volume", &current_volume, 0.0f, 100.0f);
-		//ImGui::SliderFloat("fx volume", &current_volume, 0.0f, 100.0f, "%.0f");
-		current_volume /= 100;
-
-		// WARNING: volume range (0.0-1.0) //dont go to high above 1 (you can hurt your hardware)
-		if (!fmodmanager_->set_channel_vol(FX1_CH, current_volume)) {
-			//failed
-		}
-
-		if (!fmodmanager_->set_channel_group_enabled(FX1_CH, volume_enabled)) {
-			//failed
-		}
-		ImGui::EndChild();
-	}
-	ImGui::BeginChild("##info", ImVec2(0, 150), true);
-	{
-		ImGui::Text("Name: %s", file_name_.c_str());
-		ImGui::Text("Format: %s", file_format_.c_str());
-		ImGui::Text("Type: %s", file_type_.c_str());
-		ImGui::Text("Frequency: %.0f", freq);
-		fmodmanager_->get_playback_pos(BGM_CH1,& music_pos);
-		MStoMinSec(music_pos, &music_pos_min, &music_pos_sec);
-		ImGui::Text("Length: %02d:%02d/%02d:%02d", music_pos_min, music_pos_sec, music_length_min,music_length_sec);
-		ImGui::Text("Music Volume: %.02f", curr_music_volume);
-		ImGui::Text("Music Balance: %.02f", curr_music_pan);
-	}
-	ImGui::EndChild();
-
-	//nothing
-	{
-		//FModManager::CHgroup* channel_group;
-		//if (!fmodmanager_->find_channel_group(MASTER_CH, &channel_group))
-		//{
-		//	//cannot find channel group
-		//	//do something...
-		//}
-
-		//ImGui::SliderFloat("master pitch (using dsp)", &channel_group->dsp_pitch, 0.5f, 2.0f, "%.2f");
-		//FMOD::DSP* dsp;
-		//if (!fmodmanager_->get_dsp("dsp_pitch", &dsp))
-		//{
-		//	//dsp not found...
-		//}
-		//dsp->setParameterFloat(0, channel_group->dsp_pitch);
-	}
+	//info 
+	infotext("##info", ImVec2(0, 150), &curr_music_volume, &curr_music_pan);
 
 	ImGui::End();
 
 }
-
+// ocornut (2016) https://github.com/ocornut/imgui/issues/942#issuecomment-268369298
 bool Sound_UI::MyKnob(const char* label, float* p_value, float v_min, float v_max)
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -374,6 +275,98 @@ void Sound_UI::MStoMinSec(const unsigned int ms, unsigned int* min, unsigned int
 {
 	*min = ((ms / (1000 * 60)) % 60);
 	*sec = (ms / 1000) % 60;
+}
+
+void Sound_UI::mastervolume(const char *id, const ImVec2 position,float* curr_music_volume,float* curr_music_pan)
+{
+
+	ImGui::BeginChild(id, position, true);
+	FModManager::CHgroup* channel_group;
+	fmodmanager_->find_channel_group(MASTER_CH, &channel_group);
+
+	float current_volume;
+	bool volume_enabled;
+	fmodmanager_->get_channel_vol(MASTER_CH, &current_volume);
+	fmodmanager_->get_channel_group_enabled(MASTER_CH, &volume_enabled);
+
+	current_volume *= 100;
+	*curr_music_volume = current_volume;
+	ImGui::Checkbox("enable##master_volume", &volume_enabled);
+	MyKnob("master volume", &current_volume, 0.0f, 100.0f);
+	//ImGui::SliderFloat("master volume", &current_volume, 0.0f, 100.0f, "%.0f");
+	current_volume /= 100;
+
+
+	fmodmanager_->set_channel_vol(MASTER_CH, current_volume);
+	//ImGui::SameLine();
+
+	fmodmanager_->set_channel_group_enabled(MASTER_CH, volume_enabled);
+
+	//master pan
+	float pan;
+	fmodmanager_->get_channel_group_pan(MASTER_CH, &pan);
+
+	channel_group->current_pan = pan;
+	*curr_music_pan = pan;
+	ImGui::SliderFloat("##master pan", &channel_group->current_pan, -1.0f, 1.0f, "%.2f");
+	ImGui::Text("master pan");
+	fmodmanager_->set_channel_group_pan(MASTER_CH, channel_group->current_pan);
+	ImGui::EndChild();
+
+}
+
+
+void Sound_UI::fxvolume(const char* id, const ImVec2 position)
+{
+	ImGui::BeginChild(id, position, true);
+
+	FModManager::CHgroup* channel_group;
+
+	fmodmanager_->find_channel_group(FX1_CH, &channel_group);
+
+	float current_volume;
+	bool volume_enabled;
+
+	fmodmanager_->get_channel_vol(FX1_CH, &current_volume);
+	fmodmanager_->get_channel_group_enabled(FX1_CH, &volume_enabled);
+
+	current_volume *= 100;
+	ImGui::Checkbox("enable##fx_volume", &volume_enabled);
+	MyKnob("fx volume", &current_volume, 0.0f, 100.0f);
+	//ImGui::SliderFloat("fx volume", &current_volume, 0.0f, 100.0f, "%.0f");
+	current_volume /= 100;
+
+	fmodmanager_->set_channel_vol(FX1_CH, current_volume);
+	fmodmanager_->set_channel_group_enabled(FX1_CH, volume_enabled);
+
+	ImGui::EndChild();
+}
+
+void Sound_UI::infotext(const char* id, const ImVec2 position, float* curr_music_volume, float* curr_music_pan)
+{
+	ImGui::BeginChild(id, position, true);
+	{
+		ImGui::Text("Name: %s", file_name_.c_str());
+		ImGui::Text("Format: %s", file_format_.c_str());
+		ImGui::Text("Type: %s", file_type_.c_str());
+		ImGui::Text("Frequency: %.0f", freq);
+		fmodmanager_->get_playback_pos(BGM_CH1, &music_pos);
+		MStoMinSec(music_pos, &music_pos_min, &music_pos_sec);
+		//ImGui::Text("Length: %02d:%02d/%02d:%02d", (int)music_pos_min, (int)music_pos_sec, (int)music_length_min, (int)music_length_sec);
+		ImGui::Text("Length: ");
+		ImGui::SameLine();
+		char buf[32];
+		float progress = 0.f;
+		if (music_length != 0)
+		{
+			progress = (float)music_pos / (float)music_length;
+		}
+		sprintf_s(buf, "%02d:%02d/%02d:%02d", music_pos_min, music_pos_sec, music_length_min, music_length_sec);
+		ImGui::ProgressBar(progress, ImVec2(150, 15), buf);
+		ImGui::Text("Music Volume: %.02f", *curr_music_volume);
+		ImGui::Text("Music Balance: %.02f", *curr_music_pan);
+	}
+	ImGui::EndChild();
 }
 
 

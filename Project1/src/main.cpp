@@ -33,8 +33,7 @@ void shutdown_gui();
 
 int main(int argc, char* argv[])
 {
-	//FModManager fmod;
-	//GUI gui;
+
 	bool result = false;
 	
 

@@ -224,7 +224,7 @@ bool FModManager::get_playback_pos(const std::string& CH_name, unsigned int* pos
 	{
 		return false;
 	}
-	//last_result_ = i->second->chn_ptr->isPlaying(&isplaying);
+
 	last_result_ = i->second->group_ptr->isPlaying(&isplaying);
 	if (isplaying)
 	{
@@ -258,7 +258,7 @@ bool FModManager::create_sound(const std::string& Sound_name, const std::string&
 	return true;
 }
 
-//bool FModManager::create_stream(const std::string& stream_name, const std::string& path, const int mode, const bool is_compress)
+
 bool FModManager::create_stream(const std::string& stream_name, const XML::MyMusic path , const int mode, const bool is_compress)
 {
 	FMOD::Sound* sound;

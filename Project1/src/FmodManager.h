@@ -57,15 +57,14 @@ public:
 	bool get_sound_format(const std::string& Sound_name, std::string* type, std::string* format,int* chn,int* bit);
 	bool get_sound_defualt(const std::string& Sound_name, float* freq, int* priority);
 	bool get_sound_lengh(const std::string& Sound_name,unsigned int* length);
-	//bool get_sound_numtags();
-	//bool get_sound_tag();
+
 
 	//dsp
-	bool add_dsp(const std::string& CH_name, const std::string& fx_name);
-	bool remove_dsp(const std::string& CH_name, const std::string& fx_name);
+	bool add_dsp(const std::string& CH_name, const std::string& fx_name);//todo
+	bool remove_dsp(const std::string& CH_name, const std::string& fx_name);//todo
 
 	bool create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type, const float value);
-	bool get_dsp(const std::string& DSP_name, FMOD::DSP** dsp);
+	bool get_dsp(const std::string& DSP_name, FMOD::DSP** dsp);//todo
 
 protected:
 	FMOD_RESULT last_result_;

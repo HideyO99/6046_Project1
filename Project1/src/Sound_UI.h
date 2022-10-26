@@ -6,6 +6,7 @@
 //#include "imgui/imgui_impl_opengl3.h"
 #include "FmodManager.h"
 #include "imgui/imgui.h"
+#include <vector>
 
 #define MASTER_CH	"Master"
 #define BGM_CH1		"BGM1"
@@ -21,12 +22,20 @@ public:
 	~Sound_UI();
 	
 	bool iscompress[3];
+	bool dspenable[9];
 
 	void render();
 
 protected:
 	bool MyKnob(const char* label, float* p_value, float v_min, float v_max);
 	void MStoMinSec(const unsigned int ms, unsigned int* min, unsigned int* sec);
+	void mastervolume(const char *id,const ImVec2 position, float* curr_music_volume, float* curr_music_pan);
+	void musicvolume();
+	void fxvolume(const char* id, const ImVec2 position);
+	void infotext(const char* id, const ImVec2 position, float* curr_music_volume, float* curr_music_pan);
+	void bgmload(std::string CH_name,std::string id);
+	void dsptab();
+
 
 
 	std::string file_name_;

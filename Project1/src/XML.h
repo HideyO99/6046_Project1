@@ -20,7 +20,7 @@ public:
 	std::string my_fx_path[7];
 
 
-	void readXML();// std::string fname, std::string fpath);
+	void readXML();
 
 };
 
