@@ -18,6 +18,8 @@ Sound_UI::Sound_UI(FModManager* fmod,XML* a_xml)
 	channel_ = 0;
 	bps_ = 0;
 	freq = 0.f;
+	freq_original = 0.f;
+	playspeed = 1.f;
 	priority = 0;
 	music_length = 0;
 	music_length_min = 0;
@@ -25,6 +27,7 @@ Sound_UI::Sound_UI(FModManager* fmod,XML* a_xml)
 	music_pos = 0;
 	music_pos_min = 0;
 	music_pos_sec = 0;
+	loading_flag = 0;
 }
 
 Sound_UI::~Sound_UI()
@@ -38,7 +41,9 @@ void Sound_UI::render()
 
 	//setup ui structure
 	ImGui::Begin("Audio Settings");
-	ImGui::BeginChild("##BGM1", ImVec2(0,60),true);
+	ImGui::BeginGroup();
+	ImGui::BeginChild("##BGM1", ImVec2(450, 65),true);
+	
 	
 	{
 		
@@ -49,23 +54,23 @@ void Sound_UI::render()
 		if (ImGui::Button("Load##BGM1"))
 		{
 			fmodmanager_->stop_sound(BGM_CH1);
+			fmodmanager_->stop_sound(BGM_CH2);
+			fmodmanager_->stop_sound(BGM_CH3);
 			fmodmanager_->remove_sound("bgm1");
-			fmodmanager_->create_stream("bgm1", xml_->my_music[0], FMOD_LOOP_NORMAL, iscompress[0]);
+			fmodmanager_->create_sound("bgm1", xml_->my_music[0], FMOD_LOOP_NORMAL, iscompress[0]);
 			fmodmanager_->play_sound("bgm1", BGM_CH1);
 			fmodmanager_->get_sound_name("bgm1", &file_name_);
 			fmodmanager_->get_sound_format("bgm1", &file_type_, &file_format_, &channel_, &bps_);
 			fmodmanager_->get_sound_defualt("bgm1", &freq, &priority);
+			freq_original = freq;
 			fmodmanager_->get_sound_lengh("bgm1", &music_length);
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
+			loading_flag = 1;
 		}
-		ImGui::Checkbox("echo##DSP1", &dspenable[0]); 
-		ImGui::SameLine();
-		ImGui::Checkbox("distortion##DSP2", &dspenable[1]);
-		ImGui::SameLine();
-		ImGui::Checkbox("chorus##DSP3", &dspenable[2]);
+
 	}
 	ImGui::EndChild();
-	ImGui::BeginChild("##BGM2", ImVec2(0, 60), true);
+	ImGui::BeginChild("##BGM2", ImVec2(450, 65), true);
 	{
 		ImGui::Text("BGM2: %s ", xml_->my_music[1].fname.c_str());
 		ImGui::SameLine();
@@ -74,23 +79,23 @@ void Sound_UI::render()
 		if (ImGui::Button("Load##BGM2"))
 		{	
 			fmodmanager_->stop_sound(BGM_CH1);
+			fmodmanager_->stop_sound(BGM_CH2);
+			fmodmanager_->stop_sound(BGM_CH3);
 			fmodmanager_->remove_sound("bgm2");
-			fmodmanager_->create_stream("bgm2", xml_->my_music[1], FMOD_LOOP_NORMAL, iscompress[1]);
-			fmodmanager_->play_sound("bgm2", BGM_CH1);
+			fmodmanager_->create_sound("bgm2", xml_->my_music[1], FMOD_LOOP_NORMAL, iscompress[1]);
+			fmodmanager_->play_sound("bgm2", BGM_CH2);
 			fmodmanager_->get_sound_name("bgm2", &file_name_);
 			fmodmanager_->get_sound_format("bgm2", &file_type_, &file_format_, &channel_, &bps_);
 			fmodmanager_->get_sound_defualt("bgm2", &freq, &priority);
+			freq_original = freq;
 			fmodmanager_->get_sound_lengh("bgm2", &music_length);
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
+			loading_flag = 2;
 		}
-		ImGui::Checkbox("low pass filter##DSP4", &dspenable[3]);
-		ImGui::SameLine();
-		ImGui::Checkbox("high pass filter##DSP5", &dspenable[4]);
-		ImGui::SameLine();
-		ImGui::Checkbox("fader##DSP6", &dspenable[5]);
+
 	}
 	ImGui::EndChild();
-	ImGui::BeginChild("##BGM3", ImVec2(0, 60), true);
+	ImGui::BeginChild("##BGM3", ImVec2(450, 65), true);
 	{
 		ImGui::Text("BGM3: %s ", xml_->my_music[2].fname.c_str());
 		ImGui::SameLine();
@@ -99,23 +104,29 @@ void Sound_UI::render()
 		if (ImGui::Button("Load##BGM3"))
 		{
 			fmodmanager_->stop_sound(BGM_CH1);
+			fmodmanager_->stop_sound(BGM_CH2);
+			fmodmanager_->stop_sound(BGM_CH3);
 			fmodmanager_->remove_sound("bgm3");
-			fmodmanager_->create_stream("bgm3", xml_->my_music[2], FMOD_LOOP_NORMAL, iscompress[2]);
-			fmodmanager_->play_sound("bgm3", BGM_CH1);
+			fmodmanager_->create_sound("bgm3", xml_->my_music[2], FMOD_LOOP_NORMAL, iscompress[2]);
+			fmodmanager_->play_sound("bgm3", BGM_CH3);
 			fmodmanager_->get_sound_name("bgm3", &file_name_);
 			fmodmanager_->get_sound_format("bgm3", &file_type_, &file_format_, &channel_, &bps_);
 			fmodmanager_->get_sound_defualt("bgm3", &freq, &priority);
+			freq_original = freq;
 			fmodmanager_->get_sound_lengh("bgm3", &music_length);
 			MStoMinSec(music_length, &music_length_min, &music_length_sec);
-
+			loading_flag = 3;
 		}
-		ImGui::Checkbox("pitch##DSP7", &dspenable[6]);
-		ImGui::SameLine();
-		ImGui::Checkbox("delay##DSP8", &dspenable[7]);
-		ImGui::SameLine();
-		ImGui::Checkbox("tremolo##DSP9", &dspenable[8]);
+
 	}
 	ImGui::EndChild();
+	//ImGui::EndGroup();
+
+	//ImGui::SameLine();
+
+	//DSP tab
+	//dsptab("##dsp-tools", ImVec2(0, 200));
+
 
 	////master volume
 	mastervolume("Master_volume_ctrl", ImVec2(120, 140), &curr_music_volume, &curr_music_pan);
@@ -146,76 +157,18 @@ void Sound_UI::render()
 	ImGui::SameLine();
 
 	//music volume
-	{
-		ImGui::BeginChild("Music_volume_ctrl", ImVec2(120, 140), true);
-
-		FModManager::CHgroup* channel_group;
-		if (!fmodmanager_->find_channel_group(BGM_CH1, &channel_group)) 
-		{
-			//cannot find channel group
-			//do something...
-		}
-
-		float current_volume;
-		bool volume_enabled;
-
-		if (!fmodmanager_->get_channel_vol(BGM_CH1, &current_volume)) {
-			//failed
-		}
-		
-		if (!fmodmanager_->get_channel_group_enabled(BGM_CH1, &volume_enabled)) {
-			//failed
-		}
-
-		current_volume *= 100;
-		if (curr_music_volume > current_volume)
-		{
-			curr_music_volume = current_volume;
-		}
-		ImGui::Checkbox("##music_volume", &volume_enabled);
-		MyKnob("music volume", &current_volume, 0.0f, 100.0f);
-		//ImGui::SliderFloat("music volume", &current_volume, 0.0f, 100.0f, "%.0f");
-		current_volume /= 100;
-
-		if (!fmodmanager_->set_channel_vol(BGM_CH1, current_volume)) {
-			//failed
-		}
-		
-		if (!fmodmanager_->set_channel_group_enabled(BGM_CH1, volume_enabled)) {
-			//failed
-		}
-
-		//music pan //todo -> playback speed by freq
-		{
-			FModManager::CHgroup* channel_group;
-			if (!fmodmanager_->find_channel_group(BGM_CH1, &channel_group))
-			{
-				//cannot find channel group
-				//do something...
-			}
-			float pan;
-			if (!fmodmanager_->get_channel_group_pan(BGM_CH1, &pan))
-			{
-
-			}
-			channel_group->current_pan = pan;
-			//curr_music_pan = pan;
-			ImGui::SliderFloat("##music pan", &channel_group->current_pan, -1.0f, 1.0f, "%.2f");
-			ImGui::Text("playback speed");
-			if (!fmodmanager_->set_channel_group_pan(BGM_CH1, channel_group->current_pan))
-			{
-				//error
-				//do something?
-			}
-		}
-
-		ImGui::EndChild();
-	}
+	musicvolume("Music_volume_ctrl", ImVec2(120, 140), &curr_music_volume);
 
 	ImGui::SameLine();
 
 	//FX volume
-	fxvolume("FX_volume_ctrl", ImVec2(120, 140));
+	fxvolume("FX_volume_ctrl", ImVec2(85, 140));
+	ImGui::EndGroup();
+
+	ImGui::SameLine();
+
+	//DSP tab
+	dsptab("##dsp-tools", ImVec2(0, 350));
 
 	//info 
 	infotext("##info", ImVec2(0, 150), &curr_music_volume, &curr_music_pan);
@@ -315,6 +268,45 @@ void Sound_UI::mastervolume(const char *id, const ImVec2 position,float* curr_mu
 
 }
 
+void Sound_UI::musicvolume(const char* id, const ImVec2 position, float* curr_music_volume)
+{
+	ImGui::BeginChild(id, position, true);
+
+	FModManager::CHgroup* channel_group;
+	bool volume_enabled;
+	float current_volume;
+
+	fmodmanager_->find_channel_group(BGM_CH1, &channel_group);
+	fmodmanager_->get_channel_vol(BGM_CH1, &current_volume);	
+	fmodmanager_->get_channel_group_enabled(BGM_CH1, &volume_enabled);
+
+	current_volume *= 100;
+	if (*curr_music_volume > current_volume)
+	{
+		*curr_music_volume = current_volume;
+	}
+
+	ImGui::Checkbox("enable##music_volume", &volume_enabled);
+	MyKnob("music volume", &current_volume, 0.0f, 100.0f);
+	//ImGui::SliderFloat("music volume", &current_volume, 0.0f, 100.0f, "%.0f");
+	current_volume /= 100;
+
+	fmodmanager_->set_channel_vol(BGM_CH1, current_volume);
+	fmodmanager_->set_channel_group_enabled(BGM_CH1, volume_enabled);
+
+	//music pan //todo -> playback speed by freq
+
+	fmodmanager_->get_channel_freq(BGM_CH1, &freq);
+	ImGui::SliderFloat("##music pan", &playspeed, -1.f, 3.0f, "%.2f");
+	ImGui::Text("playback speed");
+	freq = freq_original* playspeed;
+
+	fmodmanager_->set_channel_freq(BGM_CH1, freq);
+	
+	
+	ImGui::EndChild();
+}
+
 
 void Sound_UI::fxvolume(const char* id, const ImVec2 position)
 {
@@ -366,6 +358,614 @@ void Sound_UI::infotext(const char* id, const ImVec2 position, float* curr_music
 		ImGui::Text("Music Volume: %.02f", *curr_music_volume);
 		ImGui::Text("Music Balance: %.02f", *curr_music_pan);
 	}
+	ImGui::EndChild();
+}
+
+void Sound_UI::dsptab(const char* id, const ImVec2 position)
+{
+	ImGui::BeginChild(id, position, true);
+
+	ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+	if (ImGui::BeginTabBar("DSPTabBar", tab_bar_flags))
+
+	{
+		switch (loading_flag)
+		{
+		case 1:
+			if (ImGui::BeginTabItem("ECHO"))
+			{
+				static bool enable;
+				static float ech_dly = 500;
+				static float ech_feedbck = 50;
+				static float ech_drylv = 0;
+				static float ech_wetlv = 0;
+				static bool dsp_enable_flag =false;
+				//todo read and add dsp
+				ImGui::Checkbox("enable##DSP_echo_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+					//fmodmanager_->remove_dsp(BGM_CH1, DSP_ECHO);
+				}
+			
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_ECHO, 0, &ech_dly, NULL, NULL);
+				ImGui::VSliderFloat("##echo_dly", ImVec2(30, 90), &ech_dly, 1, 5000,"");
+				fmodmanager_->set_dsp_param(DSP_ECHO, 0, ech_dly);
+				ImGui::Text("%4.0f", ech_dly);
+				ImGui::Text("Delay");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(60,10);
+				
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_ECHO, 1, &ech_feedbck, NULL, NULL);
+				ImGui::VSliderFloat("##echo_feedbck", ImVec2(30, 90), &ech_feedbck, 0, 100, "");
+				fmodmanager_->set_dsp_param(DSP_ECHO, 1, ech_feedbck);
+				ImGui::Text("%.2f", ech_feedbck);
+				ImGui::Text("Feedback");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(120,10);
+				
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_ECHO, 2, &ech_drylv, NULL, NULL);
+				ImGui::VSliderFloat("##echo_drylv", ImVec2(30, 90), &ech_drylv, -80, 10, "");
+				fmodmanager_->set_dsp_param(DSP_ECHO, 2, ech_drylv);
+				ImGui::Text("%.2f", ech_drylv);
+				ImGui::Text("DryLevel");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(180,10);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_ECHO, 3, &ech_wetlv, NULL, NULL);
+				ImGui::VSliderFloat("##echo_wetlv", ImVec2(30, 90), &ech_wetlv, -80, 10, "");
+				fmodmanager_->set_dsp_param(DSP_ECHO, 3, ech_wetlv);
+				ImGui::Text("%.2f", ech_wetlv);
+				ImGui::Text("WetLevel");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH1, DSP_ECHO);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH1, DSP_ECHO);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("Distortion"))
+			{
+				static bool enable;
+				static float distlv = 0.5f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_dist_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_DISTORTION, 0, &distlv, NULL, NULL);
+				ImGui::VSliderFloat("##dist_lv", ImVec2(30, 90), &distlv, 0, 1, "");
+				fmodmanager_->set_dsp_param(DSP_DISTORTION, 0, distlv);
+				ImGui::Text("%.2f", distlv);
+				ImGui::Text("distortion level");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH1, DSP_DISTORTION);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH1, DSP_DISTORTION);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("CHORUS"))
+			{
+				static bool enable;
+				static float chr_mix = 50.f;
+				static float chr_rate = 0.8f;
+				static float chr_depth = 3.f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_chor_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_CHORUS, 0, &chr_mix, NULL, NULL);
+				ImGui::VSliderFloat("##chr_mix", ImVec2(30, 90), &chr_mix, 0, 100, "");
+				fmodmanager_->set_dsp_param(DSP_CHORUS, 0, chr_mix);
+				ImGui::Text("%.2f", chr_mix);
+				ImGui::Text("Mix");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(60, 10);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_CHORUS, 1, &chr_rate, NULL, NULL);
+				ImGui::VSliderFloat("##chr_rate", ImVec2(30, 90), &chr_rate, 0, 20, "");
+				fmodmanager_->set_dsp_param(DSP_CHORUS, 1, chr_rate);
+				ImGui::Text("%.2f", chr_rate);
+				ImGui::Text("Rate");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(120, 10);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_CHORUS, 2, &chr_depth, NULL, NULL);
+				ImGui::VSliderFloat("##chr_depth", ImVec2(30, 90), &chr_depth, 0, 100, "");
+				fmodmanager_->set_dsp_param(DSP_CHORUS, 2, chr_depth);
+				ImGui::Text("%.2f", chr_depth);
+				ImGui::Text("Depth");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH1, DSP_CHORUS);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH1, DSP_CHORUS);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+			break;
+		case 2:
+			if (ImGui::BeginTabItem("LPF"))
+			{
+				static bool enable;
+				static float cutoff = 5000.f;
+				static float resonance = 1.f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_LPF_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_LOWPASSFILTER, 0, &cutoff, NULL, NULL);
+				ImGui::VSliderFloat("##lpf_cutoff", ImVec2(30, 90), &cutoff, 1, 22000, "");
+				fmodmanager_->set_dsp_param(DSP_LOWPASSFILTER, 0, cutoff);
+				ImGui::Text("%4.0f", cutoff);
+				ImGui::Text("CutOff");
+				ImGui::EndGroup();
+
+				ImGui::SameLine();
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_LOWPASSFILTER, 1, &resonance, NULL, NULL);
+				ImGui::VSliderFloat("##lpf_resonance", ImVec2(30, 90), &resonance, 0, 10, "");
+				fmodmanager_->set_dsp_param(DSP_LOWPASSFILTER, 1, resonance);
+				ImGui::Text("%4.02f", resonance);
+				ImGui::Text("Resonance");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH2, DSP_LOWPASSFILTER);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH2, DSP_LOWPASSFILTER);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("HPF"))
+			{
+				static bool enable;
+				static float cutoff = 5000.f;
+				static float resonance = 1.f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_HPF_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_HIGHPASSFILTER, 0, &cutoff, NULL, NULL);
+				ImGui::VSliderFloat("##hpf_cutoff", ImVec2(30, 90), &cutoff, 1, 22000, "");
+				fmodmanager_->set_dsp_param(DSP_HIGHPASSFILTER, 0, cutoff);
+				ImGui::Text("%.2f", cutoff);
+				ImGui::Text("CutOff");
+				ImGui::EndGroup();
+
+				ImGui::SameLine();
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_HIGHPASSFILTER, 1, &resonance, NULL, NULL);
+				ImGui::VSliderFloat("##hpf_resonance", ImVec2(30, 90), &resonance, 1, 10, "");
+				fmodmanager_->set_dsp_param(DSP_HIGHPASSFILTER, 1, resonance);
+				ImGui::Text("%.2f", resonance);
+				ImGui::Text("Resonance");
+				ImGui::EndGroup();
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH2, DSP_HIGHPASSFILTER);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH2, DSP_HIGHPASSFILTER);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("FADER"))
+			{
+				static bool enable;
+				static float gain = 0;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_fade_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_FADER, 0, &gain, NULL, NULL);
+				ImGui::VSliderFloat("##fdr_gain", ImVec2(30, 90), &gain, -80, 10, "");
+				fmodmanager_->set_dsp_param(DSP_FADER, 0, gain);
+				ImGui::Text("%.2f", gain);
+				ImGui::Text("Gain");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH2, DSP_FADER);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH2, DSP_FADER);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+			break;
+		case 3:
+			if (ImGui::BeginTabItem("PITCH"))
+			{
+				static bool enable;
+				static float pitch = 1;
+				static float fftsize = 1024;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_pitch_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_PITCHSHIFT, 0, &pitch, NULL, NULL);
+				ImGui::VSliderFloat("##ptch_pitch", ImVec2(30, 90), &pitch, 0.5, 2, "");
+				fmodmanager_->set_dsp_param(DSP_PITCHSHIFT, 0, pitch);
+				ImGui::Text("%.2f", pitch);
+				ImGui::Text("CutOff");
+				ImGui::EndGroup();
+
+				ImGui::SameLine();
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_PITCHSHIFT, 1, &fftsize, NULL, NULL);
+				ImGui::VSliderFloat("##ptch_fftsize", ImVec2(30, 90), &fftsize, 1, 1024, "");//todo chk
+				fmodmanager_->set_dsp_param(DSP_PITCHSHIFT, 1, fftsize);
+				ImGui::Text("%.2f", fftsize);
+				ImGui::Text("FFT size");
+				ImGui::EndGroup();
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH3, DSP_PITCHSHIFT);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH3, DSP_PITCHSHIFT);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("FLANGE"))
+			{
+				static bool enable;
+				static float flng_mix = 50.f;
+				static float flng_rate = 1.f;
+				static float flng_depth = 1.f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_FLANGE_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_FLANGE, 0, &flng_mix, NULL, NULL);
+				ImGui::VSliderFloat("##flng_mix", ImVec2(30, 90), &flng_mix, 0, 100, "");
+				fmodmanager_->set_dsp_param(DSP_FLANGE, 0, flng_mix);
+				ImGui::Text("%.2f", flng_mix);
+				ImGui::Text("Mix");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(60, 10);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_FLANGE, 1, &flng_depth, NULL, NULL);
+				ImGui::VSliderFloat("##flng_depth", ImVec2(30, 90), &flng_depth, 0, 20, "");
+				fmodmanager_->set_dsp_param(DSP_FLANGE, 1, flng_depth);
+				ImGui::Text("%.2f", flng_depth);
+				ImGui::Text("Depth");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(120, 10);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_FLANGE, 2, &flng_rate, NULL, NULL);
+				ImGui::VSliderFloat("##flng_rate", ImVec2(30, 90), &flng_rate, 0.01, 1, "");
+				fmodmanager_->set_dsp_param(DSP_FLANGE, 2, flng_rate);
+				ImGui::Text("%.2f", flng_rate);
+				ImGui::Text("Rate");
+				ImGui::EndGroup();
+				
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH3, DSP_FLANGE);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH3, DSP_FLANGE);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+
+			if (ImGui::BeginTabItem("TREMELO"))
+			{
+				static bool enable;
+				static float tml_freq = 5.f;
+				static float tml_depth = 1.f;
+				static float tml_shape = 1.f;
+				static float tml_skew = 0.f;
+				static float tml_duty = 0.5f;
+				static float tml_sqrt = 1.f;
+				static float tml_phase = 0.f;
+				static float tml_spread= 0.f;
+				static bool dsp_enable_flag = false;
+
+				ImGui::Checkbox("enable##DSP_TML_enable", &enable);
+				if (!enable)
+				{
+					ImGui::BeginDisabled(true);
+				}
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 0, &tml_freq, NULL, NULL);
+				ImGui::VSliderFloat("##tml_freq", ImVec2(20, 90), &tml_freq, 0.01, 20, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 0, tml_freq);
+				ImGui::Text("%.2f", tml_freq);
+				ImGui::Text("Freq");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(50, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 1, &tml_depth, NULL, NULL);
+				ImGui::VSliderFloat("##tml_depth", ImVec2(20, 90), &tml_depth, 0, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 1, tml_depth);
+				ImGui::Text("%.2f", tml_depth);
+				ImGui::Text("Depth");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(100, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 2, &tml_shape, NULL, NULL);
+				ImGui::VSliderFloat("##tml_shape", ImVec2(20, 90), &tml_shape, 0, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 2, tml_shape);
+				ImGui::Text("%.2f", tml_shape);
+				ImGui::Text("Shape");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(150, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 3, &tml_skew, NULL, NULL);
+				ImGui::VSliderFloat("##tml_skew", ImVec2(20, 90), &tml_skew, -1, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 3, tml_skew);
+				ImGui::Text("%.2f", tml_skew);
+				ImGui::Text("Skew");
+				ImGui::EndGroup();
+
+				//ImGui::SameLine();
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 4, &tml_duty, NULL, NULL);
+				ImGui::VSliderFloat("##tml_duty", ImVec2(20, 90), &tml_duty, 0, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 4, tml_duty);
+				ImGui::Text("%.2f", tml_duty);
+				ImGui::Text("Duty");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(50, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 5, &tml_sqrt, NULL, NULL);
+				ImGui::VSliderFloat("##tml_sqrt", ImVec2(20, 90), &tml_sqrt, 0, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 5, tml_sqrt);
+				ImGui::Text("%.2f", tml_sqrt);
+				ImGui::Text("Square");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(100, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 6, &tml_phase, NULL, NULL);
+				ImGui::VSliderFloat("##tml_phase", ImVec2(20, 90), &tml_phase, -1, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 6, tml_phase);
+				ImGui::Text("%.2f", tml_phase);
+				ImGui::Text("Phase");
+				ImGui::EndGroup();
+
+				ImGui::SameLine(150, 0);
+
+				ImGui::BeginGroup();
+				//todo read dsp
+				fmodmanager_->get_dsp_param(DSP_TREMELO, 7, &tml_spread, NULL, NULL);
+				ImGui::VSliderFloat("##tml_spread", ImVec2(20, 90), &tml_spread, -1, 1, "");
+				fmodmanager_->set_dsp_param(DSP_TREMELO, 7, tml_spread);
+				ImGui::Text("%.2f", tml_spread);
+				ImGui::Text("Spread");
+				ImGui::EndGroup();
+
+				if (!enable)
+				{
+					ImGui::EndDisabled();
+				}
+				//toggle checking
+				if (dsp_enable_flag != enable)
+				{
+					if (enable)
+					{
+						fmodmanager_->add_dsp(BGM_CH3, DSP_TREMELO);
+						dsp_enable_flag = true;
+					}
+					else
+					{
+						fmodmanager_->remove_dsp(BGM_CH3, DSP_TREMELO);
+						dsp_enable_flag = false;
+					}
+				}
+				ImGui::EndTabItem();
+
+			}
+			break;
+		default:
+			break;
+		}
+
+		ImGui::EndTabBar();
+
+	}
+
+
+
 	ImGui::EndChild();
 }
 

@@ -43,10 +43,14 @@ public:
 	bool get_channel_pitch(const std::string& CH_name, float* pitch);
 	bool set_channel_pitch(const std::string& CH_name, float pitch);
 
+	bool get_channel_freq(const std::string& CH_name, float* freq);
+	bool set_channel_freq(const std::string& CH_name, float freq);
+
 	bool get_playback_pos(const std::string& CH_name, unsigned int* pos);
 
 
-	bool create_sound(const std::string& Sound_name,const std::string& path,const int mode, const bool is_compress);
+	bool create_sound(const std::string& Sound_name, const XML::MyMusic path,const int mode, const bool is_compress);
+	bool create_sound(const std::string& Sound_name, const std::string& path, const int mode, const bool iscompress);
 	bool create_stream(const std::string& stream_name, const XML::MyMusic path, const int mode, const bool is_compress);
 	bool remove_sound(const std::string& Sound_name);
 	bool play_sound(const std::string& Sound_name, const std::string& CH_name);
@@ -62,9 +66,14 @@ public:
 	//dsp
 	bool add_dsp(const std::string& CH_name, const std::string& fx_name);//todo
 	bool remove_dsp(const std::string& CH_name, const std::string& fx_name);//todo
+	//bool create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type, const float value);
+	bool create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type);
+	bool get_dsp(const std::string& DSP_name, FMOD::DSP** dsp);
+	bool get_dsp_param(const std::string& DSP_name, const int index, float* value, char* valuestr, const int valuestrlen);
+	//todo
 
-	bool create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type, const float value);
-	bool get_dsp(const std::string& DSP_name, FMOD::DSP** dsp);//todo
+	//bool get_dsp_param(const std::string& DSP_name, const int index, const float* value);
+	bool set_dsp_param(const std::string& DSP_name, const int index, const float value);
 
 protected:
 	FMOD_RESULT last_result_;

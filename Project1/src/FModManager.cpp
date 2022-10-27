@@ -215,9 +215,46 @@ bool FModManager::set_channel_pitch(const std::string& CH_name, float pitch)
 	return is_Fmod_ok();
 }
 
+bool FModManager::get_channel_freq(const std::string& CH_name, float* freq)
+{
+	bool isplaying = false;
+	const auto i = channel_group_.find(CH_name);
+	if (i == channel_group_.end())
+	{
+		return false;
+	}
+	last_result_ = i->second->group_ptr->isPlaying(&isplaying);
+	if (isplaying)
+	{
+		last_result_ = i->second->chn_ptr->getFrequency(freq);
+	}
+	else
+	{
+		*freq = NULL;
+	}
+	return is_Fmod_ok();
+}
+
+bool FModManager::set_channel_freq(const std::string& CH_name, float freq)
+{
+	bool isplaying = false;
+	const auto i = channel_group_.find(CH_name);
+	if (i == channel_group_.end())
+	{
+		return false;
+	}
+
+	last_result_ = i->second->group_ptr->isPlaying(&isplaying);
+	if (isplaying)
+	{
+		last_result_ = i->second->chn_ptr->setFrequency(freq);
+	}
+	return is_Fmod_ok();
+}
+
 bool FModManager::get_playback_pos(const std::string& CH_name, unsigned int* pos)
 {
-	FMOD::Channel* channel;
+	//FMOD::Channel* channel;
 	bool isplaying = false;
 	const auto i = channel_group_.find(CH_name);
 	if (i == channel_group_.end())
@@ -233,21 +270,23 @@ bool FModManager::get_playback_pos(const std::string& CH_name, unsigned int* pos
 	return is_Fmod_ok();
 }
 
-bool FModManager::create_sound(const std::string& Sound_name, const std::string& path, const int mode, const bool iscompress)
+bool FModManager::create_sound(const std::string& Sound_name, const XML::MyMusic path, const int mode, const bool iscompress)
 {
 	FMOD::Sound* sound;
 	int option = mode;
-
-	if (iscompress)
+	std::string sel_path;
+	if (!iscompress)
 	{
-		option |= FMOD_CREATECOMPRESSEDSAMPLE;
+		sel_path = path.path[0];
+		option |= FMOD_CREATESAMPLE;
 	}
 	else
 	{
-		option |= FMOD_CREATESAMPLE;
+		sel_path = path.path[1];
+		option |= FMOD_CREATECOMPRESSEDSAMPLE;
 	}
 
-	last_result_ = system_->createSound(path.c_str(), option, nullptr, &sound);
+	last_result_ = system_->createSound(sel_path.c_str(), option, nullptr, &sound);
 	if (!is_Fmod_ok())
 	{
 		return false;
@@ -258,6 +297,32 @@ bool FModManager::create_sound(const std::string& Sound_name, const std::string&
 	return true;
 }
 
+bool FModManager::create_sound(const std::string& Sound_name, const std::string& path, const int mode, const bool iscompress)
+{
+	FMOD::Sound* sound;
+	int option = mode;
+	
+	if (!iscompress)
+	{
+		
+		option |= FMOD_CREATESAMPLE;
+	}
+	else
+	{
+		
+		option |= FMOD_CREATECOMPRESSEDSAMPLE;
+	}
+
+	last_result_ = system_->createSound(path.c_str(), option, nullptr, &sound);
+	if (!is_Fmod_ok())
+	{
+		return false;
+	}
+
+	sound_.try_emplace(Sound_name, sound); //add to sound map
+
+	return true;
+}
 
 bool FModManager::create_stream(const std::string& stream_name, const XML::MyMusic path , const int mode, const bool is_compress)
 {
@@ -461,7 +526,25 @@ bool FModManager::remove_dsp(const std::string& CH_name, const std::string& fx_n
 	return is_Fmod_ok();
 }
 
-bool FModManager::create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type, const float value)
+//bool FModManager::create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type, const float value)
+//{
+//	FMOD::DSP* dsp;
+//	last_result_ = system_->createDSPByType(DSP_type, &dsp);
+//	if (!is_Fmod_ok())
+//	{
+//		return false;
+//	}
+//	
+//	last_result_ = dsp->setParameterFloat(0, value);
+//	if (!is_Fmod_ok())
+//	{
+//		return false;
+//	}
+//	dsp_.try_emplace(DSP_name, dsp);
+//	
+//	return true;
+//}
+bool FModManager::create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type)
 {
 	FMOD::DSP* dsp;
 	last_result_ = system_->createDSPByType(DSP_type, &dsp);
@@ -470,11 +553,6 @@ bool FModManager::create_dsp(const std::string& DSP_name, FMOD_DSP_TYPE DSP_type
 		return false;
 	}
 	
-	last_result_ = dsp->setParameterFloat(0, value);
-	if (!is_Fmod_ok())
-	{
-		return false;
-	}
 	dsp_.try_emplace(DSP_name, dsp);
 	
 	return true;
@@ -491,6 +569,31 @@ bool FModManager::get_dsp(const std::string& DSP_name, FMOD::DSP** dsp)
 	*dsp = dsp_i->second;
 
 	return true;
+}
+
+bool FModManager::get_dsp_param(const std::string& DSP_name, const int index, float* value, char* valuestr,const int valuestrlen)
+{
+	const auto dsp_i = dsp_.find(DSP_name);
+	if (dsp_i == dsp_.end())
+	{
+		return false;
+	}
+	last_result_ = dsp_i->second->getParameterFloat(index, value, valuestr, valuestrlen);
+
+	return is_Fmod_ok();
+}
+
+bool FModManager::set_dsp_param(const std::string& DSP_name, const int index, const float value)
+{
+	const auto dsp_i = dsp_.find(DSP_name);
+	if (dsp_i == dsp_.end())
+	{
+		return false;
+	}
+	last_result_ = dsp_i->second->setParameterFloat(index, value);
+
+	return is_Fmod_ok();
+	return false;
 }
 
 bool FModManager::is_Fmod_ok(const bool show_error) const

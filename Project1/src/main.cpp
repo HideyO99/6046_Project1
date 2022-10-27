@@ -87,15 +87,15 @@ int main(int argc, char* argv[])
 	result = fmodmanager.create_sound("fx7", xml.my_fx_path[6], FMOD_DEFAULT, false);
 	//result = fmodmanager.play_sound("bgm1", BGM_CH1);
 
-	result = fmodmanager.create_dsp("echo", FMOD_DSP_TYPE_ECHO, 500.f);
-	result = fmodmanager.create_dsp("dist", FMOD_DSP_TYPE_DISTORTION, 0.5f);
-	result = fmodmanager.create_dsp("chorus", FMOD_DSP_TYPE_CHORUS, 50.f);
-	result = fmodmanager.create_dsp("lpf", FMOD_DSP_TYPE_LOWPASS, 5000.f);
-	result = fmodmanager.create_dsp("hpf", FMOD_DSP_TYPE_HIGHPASS, 5000.f);
-	result = fmodmanager.create_dsp("fader", FMOD_DSP_TYPE_FADER, 0.f);
-	result = fmodmanager.create_dsp("pitch", FMOD_DSP_TYPE_PITCHSHIFT, 1.f);
-	result = fmodmanager.create_dsp("delay", FMOD_DSP_TYPE_DELAY, 0.f);
-	result = fmodmanager.create_dsp("tremolo", FMOD_DSP_TYPE_TREMOLO, 5.f);
+	result = fmodmanager.create_dsp(DSP_ECHO			, FMOD_DSP_TYPE_ECHO);
+	result = fmodmanager.create_dsp(DSP_DISTORTION		, FMOD_DSP_TYPE_DISTORTION);
+	result = fmodmanager.create_dsp(DSP_CHORUS			, FMOD_DSP_TYPE_CHORUS);
+	result = fmodmanager.create_dsp(DSP_LOWPASSFILTER	, FMOD_DSP_TYPE_LOWPASS);
+	result = fmodmanager.create_dsp(DSP_HIGHPASSFILTER	, FMOD_DSP_TYPE_HIGHPASS);
+	result = fmodmanager.create_dsp(DSP_FADER			, FMOD_DSP_TYPE_FADER);
+	result = fmodmanager.create_dsp(DSP_PITCHSHIFT		, FMOD_DSP_TYPE_PITCHSHIFT);
+	result = fmodmanager.create_dsp(DSP_FLANGE			, FMOD_DSP_TYPE_FLANGE);
+	result = fmodmanager.create_dsp(DSP_TREMELO			, FMOD_DSP_TYPE_TREMOLO);
 
 	
 	run();
