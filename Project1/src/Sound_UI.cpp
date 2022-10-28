@@ -737,7 +737,7 @@ void Sound_UI::dsptab(const char* id, const ImVec2 position)
 				ImGui::BeginGroup();
 				//todo read dsp
 				fmodmanager_->get_dsp_param(DSP_PITCHSHIFT, 1, &fftsize, NULL, NULL);
-				ImGui::VSliderFloat("##ptch_fftsize", ImVec2(30, 90), &fftsize, 1, 1024, "");//todo chk
+				ImGui::VSliderFloat("##ptch_fftsize", ImVec2(30, 90), &fftsize, 256, 4096, "");//todo chk
 				fmodmanager_->set_dsp_param(DSP_PITCHSHIFT, 1, fftsize);
 				ImGui::Text("%.2f", fftsize);
 				ImGui::Text("FFT size");
@@ -791,7 +791,7 @@ void Sound_UI::dsptab(const char* id, const ImVec2 position)
 				ImGui::BeginGroup();
 				//todo read dsp
 				fmodmanager_->get_dsp_param(DSP_FLANGE, 1, &flng_depth, NULL, NULL);
-				ImGui::VSliderFloat("##flng_depth", ImVec2(30, 90), &flng_depth, 0, 20, "");
+				ImGui::VSliderFloat("##flng_depth", ImVec2(30, 90), &flng_depth, 0.01, 1, "");
 				fmodmanager_->set_dsp_param(DSP_FLANGE, 1, flng_depth);
 				ImGui::Text("%.2f", flng_depth);
 				ImGui::Text("Depth");
@@ -802,7 +802,7 @@ void Sound_UI::dsptab(const char* id, const ImVec2 position)
 				ImGui::BeginGroup();
 				//todo read dsp
 				fmodmanager_->get_dsp_param(DSP_FLANGE, 2, &flng_rate, NULL, NULL);
-				ImGui::VSliderFloat("##flng_rate", ImVec2(30, 90), &flng_rate, 0.01, 1, "");
+				ImGui::VSliderFloat("##flng_rate", ImVec2(30, 90), &flng_rate, 0, 20, "");
 				fmodmanager_->set_dsp_param(DSP_FLANGE, 2, flng_rate);
 				ImGui::Text("%.2f", flng_rate);
 				ImGui::Text("Rate");
@@ -917,7 +917,7 @@ void Sound_UI::dsptab(const char* id, const ImVec2 position)
 				ImGui::BeginGroup();
 				//todo read dsp
 				fmodmanager_->get_dsp_param(DSP_TREMELO, 6, &tml_phase, NULL, NULL);
-				ImGui::VSliderFloat("##tml_phase", ImVec2(20, 90), &tml_phase, -1, 1, "");
+				ImGui::VSliderFloat("##tml_phase", ImVec2(20, 90), &tml_phase, 0, 1, "");
 				fmodmanager_->set_dsp_param(DSP_TREMELO, 6, tml_phase);
 				ImGui::Text("%.2f", tml_phase);
 				ImGui::Text("Phase");
