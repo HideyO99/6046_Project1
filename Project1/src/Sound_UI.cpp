@@ -338,11 +338,26 @@ void Sound_UI::infotext(const char* id, const ImVec2 position, float* curr_music
 {
 	ImGui::BeginChild(id, position, true);
 	{
+		std::string curCH;
+		switch (loading_flag)
+		{
+		case 1:
+			curCH = BGM_CH1;
+			break;
+		case 2:
+			curCH = BGM_CH2;
+			break;
+		case 3:
+			curCH = BGM_CH3;
+			break;
+		default:
+			break;
+		}
 		ImGui::Text("Name: %s", file_name_.c_str());
 		ImGui::Text("Format: %s", file_format_.c_str());
 		ImGui::Text("Type: %s", file_type_.c_str());
 		ImGui::Text("Frequency: %.0f", freq);
-		fmodmanager_->get_playback_pos(BGM_CH1, &music_pos);
+		fmodmanager_->get_playback_pos(curCH, &music_pos);
 		MStoMinSec(music_pos, &music_pos_min, &music_pos_sec);
 		//ImGui::Text("Length: %02d:%02d/%02d:%02d", (int)music_pos_min, (int)music_pos_sec, (int)music_length_min, (int)music_length_sec);
 		ImGui::Text("Length: ");
